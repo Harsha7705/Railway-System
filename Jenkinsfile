@@ -1,57 +1,39 @@
 pipeline {
     agent any
 
-    environment {
-        APP_NAME = 'railway-reservation'
-        JAR_NAME = 'railway-reservation-1.0.0.jar'
-        PORT = 8085
+    tools {
+        maven 'Maven3' // match the name you gave in Jenkins
+        jdk 'Java21'   // make sure Java is configured in Jenkins too
     }
 
     stages {
         stage('Checkout') {
             steps {
-                echo 'Checking out code...'
-                retry(3) {
-                    git branch: 'main', url: 'https://github.com/Harsha7705/Railway-System.git'
-                }
+                git branch: 'main', url: 'https://github.com/Harsha7705/Railway-System.git'
             }
         }
 
         stage('Build') {
             steps {
-                echo 'Building the project...'
-                sh 'mvn clean package -DskipTests'
+                bat 'mvn clean package'
             }
         }
 
-        stage('Stop Existing App') {
+        stage('Test') {
             steps {
-                echo "Stopping any existing app on port ${PORT}..."
-                // Kill process on the port
-                sh """
-                if lsof -i :${PORT} -t >/dev/null; then
-                    kill -9 \$(lsof -i :${PORT} -t)
-                else
-                    echo "No process running on port ${PORT}"
-                fi
-                """
+                bat 'mvn test'
             }
         }
 
-        stage('Deploy') {
+        stage('Run') {
             steps {
-                echo 'Deploying application...'
-                sh "nohup java -jar target/${JAR_NAME} > app.log 2>&1 &"
+                bat 'java -jar target/railway-reservation-system-0.0.1-SNAPSHOT.jar'
             }
         }
     }
 
     post {
-        success {
-            echo 'Deployment successful!'
-        }
-        failure {
-            echo 'Build or deployment failed!'
-        }
+        success { echo 'Build and tests successful!' }
+        failure { echo 'Build or tests failed!' }
     }
 }
