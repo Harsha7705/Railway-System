@@ -2,44 +2,56 @@ pipeline {
     agent any
 
     environment {
-        JAVA_HOME = "C:\\Program Files\\Java\\jdk-21" // your JDK path
-        MAVEN_HOME = "C:\\Program Files\\Apache\\maven-3.9.0" // adjust if needed
+        APP_NAME = 'railway-reservation'
+        JAR_NAME = 'railway-reservation-1.0.0.jar'
+        PORT = 8085
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/Harsha7705/Railway-System.git'
+                echo 'Checking out code...'
+                retry(3) {
+                    git branch: 'main', url: 'https://github.com/yourusername/railway-reservation-system.git'
+                }
             }
         }
 
         stage('Build') {
             steps {
-                bat "${MAVEN_HOME}\\bin\\mvn clean package"
+                echo 'Building the project...'
+                sh 'mvn clean package -DskipTests'
             }
         }
 
         stage('Stop Existing App') {
             steps {
-                // Kill process using port 8085 (change port if needed)
-                bat "netstat -ano | findstr :8085"
-                bat "for /f \"tokens=5\" %a in ('netstat -ano ^| findstr :8085') do taskkill /PID %a /F"
+                echo "Stopping any existing app on port ${PORT}..."
+                // Kill process on the port
+                sh """
+                if lsof -i :${PORT} -t >/dev/null; then
+                    kill -9 \$(lsof -i :${PORT} -t)
+                else
+                    echo "No process running on port ${PORT}"
+                fi
+                """
             }
         }
 
         stage('Deploy') {
             steps {
-                bat "java -jar target\\railway-reservation-1.0.0.jar"
+                echo 'Deploying application...'
+                sh "nohup java -jar target/${JAR_NAME} > app.log 2>&1 &"
             }
         }
     }
 
     post {
+        success {
+            echo 'Deployment successful!'
+        }
         failure {
             echo 'Build or deployment failed!'
-        }
-        success {
-            echo 'Build and deployment successful!'
         }
     }
 }
