@@ -12,7 +12,7 @@ pipeline {
             steps {
                 echo 'Checking out code...'
                 retry(3) {
-                    git branch: 'main', url: 'https://github.com/yourusername/railway-reservation-system.git'
+                    git branch: 'main', url: 'https://github.com/Harsha7705/Railway-System.git'
                 }
             }
         }
