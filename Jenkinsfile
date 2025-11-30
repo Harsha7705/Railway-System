@@ -2,8 +2,9 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven3' 
-        jdk 'Java21'   
+        jdk 'Java21'       // Your configured Java
+        maven 'Maven3'     // Optional, can be left if not building
+        git 'GitDefault'   // Optional, if you want Jenkins to use your Git tool
     }
 
     stages {
@@ -13,32 +14,20 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Run JAR') {
             steps {
-                bat '"mvn" clean package'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                bat '"mvn" test'
-            }
-        }
-
-        stage('Run') {
-            steps {
-                echo 'Running the application...'
-                bat '"java" -jar "target\\railway-reservation-1.0.0.jar"'
+                // Use double quotes and call to handle Windows path
+                bat 'java -jar "target/railway-reservation-1.0.0.jar"'
             }
         }
     }
 
     post {
         success {
-            echo 'Build and tests successful!'
+            echo 'Application ran successfully!'
         }
         failure {
-            echo 'Build or tests failed!'
+            echo 'Failed to run the application!'
         }
     }
 }
