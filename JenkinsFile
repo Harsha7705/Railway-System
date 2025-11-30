@@ -1,0 +1,45 @@
+pipeline {
+    agent any
+
+    tools {
+        jdk 'Java21'
+        maven 'Maven3'
+        git 'GitDefault'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/Harsha7705/Railway-System.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                bat "mvn clean package"
+            }
+        }
+
+        stage('Test') {
+            steps {
+                bat "mvn test"
+            }
+        }
+
+        stage('Run') {
+            steps {
+                bat "java -jar target/*.jar"
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo "❌ Build failed."
+        }
+        success {
+            echo "✅ Build complete."
+        }
+    }
+}
