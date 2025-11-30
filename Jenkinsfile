@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/yourusername/railway-reservation-system.git'
+                git branch: 'main', url: 'https://github.com/Harsha7705/Railway-System.git'
             }
         }
 
