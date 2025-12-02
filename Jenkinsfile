@@ -2,32 +2,27 @@ pipeline {
     agent any
 
     tools {
-        jdk 'Java21'       // Your configured Java
-        maven 'Maven3'     // Optional, can be left if not building
-        git 'GitDefault'   // Optional, if you want Jenkins to use your Git tool
+        maven 'Maven3'    // Make sure Jenkins has this tool configured
+        jdk   'Java21'        // Or whatever version your project uses
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/Harsha7705/Railway-System.git'
+                checkout scm
             }
         }
 
-        stage('Run JAR') {
+        stage('Build & Test') {
             steps {
-                // Use double quotes and call to handle Windows path
-                bat 'java -jar "target/railway-reservation-1.0.0.jar"'
+                sh 'mvn clean install -DskipTests=false'
             }
         }
     }
 
     post {
-        success {
-            echo 'Application ran successfully!'
-        }
-        failure {
-            echo 'Failed to run the application!'
+        always {
+            junit '**/target/surefire-reports/*.xml'
         }
     }
 }
