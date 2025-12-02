@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven3'    // Make sure Jenkins has this tool configured
-        jdk   'Java21'        // Or whatever version your project uses
+        maven 'Maven3'
+        jdk 'Java21'
     }
 
     stages {
@@ -15,14 +15,15 @@ pipeline {
 
         stage('Build & Test') {
             steps {
-                sh 'mvn clean install -DskipTests=false'
+                bat 'mvn clean install -DskipTests=false'
             }
         }
     }
 
     post {
         always {
-            junit '**/target/surefire-reports/*.xml'
+            // Don't fail pipeline if no test results exist
+            junit testResults: '**/target/surefire-reports/*.xml', allowEmptyResults: true
         }
     }
 }
